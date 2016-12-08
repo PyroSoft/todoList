@@ -3,7 +3,7 @@
 // angular.module is a global place for creating, registering and retrieving Angular modules
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
-var app = angular.module('starter', ['ionic','ngCordova']);
+var app = angular.module('starter', ['ionic','ngCordova','$actionButton']);
 var db = null;
 
 app.run(function($ionicPlatform,$cordovaSQLite) {
@@ -21,24 +21,24 @@ app.run(function($ionicPlatform,$cordovaSQLite) {
     if(window.StatusBar) {
       StatusBar.styleDefault();
     }
-    console.log("deviceReady");
+    //console.log("deviceReady");
   });
 });
 
-app.controller('mainCtrl',function ($scope,$ionicPopup,$timeout,$cordovaSQLite,$ionicPlatform) {
-  $scope.delTodo = {
-    "showDel" : false
+app.controller('mainCtrl',function ($scope,$ionicPopup,$timeout,$cordovaSQLite,$ionicPlatform,$actionButton) {
+  $scope.editTodo = {
+    "showEdit" : false
   };
 
   $scope.todos = [
-    /*{
+    {
       "id":"1",
       "name":"todo1"
     },
     {
       "id":"2",
       "name":"todo2"
-    }*/
+    }
   ];
 
   $ionicPlatform.ready(function () {
@@ -120,6 +120,57 @@ app.controller('mainCtrl',function ($scope,$ionicPopup,$timeout,$cordovaSQLite,$
   };
 
   $scope.updateTodo = function (index) {
-    console.log("updateTodo: "+index);
+    var addPopup = $ionicPopup.show({
+      template: '<input type="text" ng-model="todos.todo">',
+      title: 'Enter To Do',
+      subTitle: 'Please use normal things',
+      scope: $scope,
+      buttons: [
+        { text: 'Cancel' },
+        {
+          text: '<b>Save</b>',
+          type: 'button-positive',
+          onTap: function(e) {
+            if (!$scope.todos.todo) {
+              //don't allow the user to close unless he enters something
+              e.preventDefault();
+            } else {
+              $scope.modifyTodo($scope.todos.todo,index);
+            }
+          }
+        }
+      ]
+    });
+
+    $timeout(function() {
+      addPopup.close(); //close the popup after 10 seconds for some reason
+    }, 10000);
   };
+
+  $scope.modifyTodo = function (todo,index) {
+    var query = "UPDATE dbTodo SET todo = '" +todo+ "' WHERE idTodo = " +$scope.todos[index].id;
+    $cordovaSQLite.execute(db,query).then(function (res) {
+      $scope.todos[index].name = todo;
+    }, function (err) {
+      console.error(err);
+    });
+  };
+
+  $scope.moveTodo = function (fromIndex, toIndex) {
+    var item = $scope.todos[fromIndex].name;
+
+    $scope.todos.splice(fromIndex, 1);
+    $scope.todos.splice(toIndex, 0, item);
+  };
+
+  var actionButton = $actionButton.create({
+    mainAction: {
+      icon: 'ion-plus-round',
+      backgroundColor: '#9E9E9E',
+      textColor: 'white',
+      onClick: function () {
+        $scope.addTodo();
+      }
+    }
+  });
 });
