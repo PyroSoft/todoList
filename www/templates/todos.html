@@ -1,0 +1,14 @@
+<ion-pane>
+  <ion-header-bar></ion-header-bar>
+  <ion-content>
+    <ion-list class="list" show-delete="editTodo.showEdit" show-reorder="editTodo.showEdit"
+              on-drag-left="editTodo.showEdit = !editTodo.showEdit">
+
+      <ion-item ng-repeat='todo in todos' class="item item-icon-right" ng-click="updateTodo($index)">
+        <ion-delete-button class="ion-minus-circled" ng-click="removeTodo($index)"></ion-delete-button>
+        {{todo.name}}
+        <ion-reorder-button class ="icon ion-navicon" on-reorder="moveTodo($fromIndex,$toIndex)"></ion-reorder-button>
+      </ion-item>
+    </ion-list>
+  </ion-content>
+</ion-pane>
