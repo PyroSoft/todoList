@@ -1,6 +1,6 @@
 var app = angular.module('starter.controllers', ['ngCordova','$actionButton']);
 var db = null;
-var log = true;
+var log = false;
 
 app.controller('mainCtrl',function ($scope,$ionicPopup,$timeout,$cordovaSQLite,$ionicPlatform,$actionButton) {
 
@@ -71,19 +71,19 @@ app.controller('mainCtrl',function ($scope,$ionicPopup,$timeout,$cordovaSQLite,$
           });
           if(log){
             console.log("Loaded: ");
-            console.log($scope.todos[i]);
+            console.log($scope.todos[i].name);
           }
         }
       }
     }, function (error) {
-      console.log(error);
+      console.log(error.message);
     });
   };
 
   $scope.addTodo = function () {
     var addPopup = $ionicPopup.show({
       template: '<input type="text" ng-model="todos.todo">',
-      title: 'Enter To Do',
+      title: 'New To Do',
       subTitle: 'Please use normal things',
       scope: $scope,
       buttons: [
@@ -119,10 +119,10 @@ app.controller('mainCtrl',function ($scope,$ionicPopup,$timeout,$cordovaSQLite,$
       });
       if(log) {
         console.log("Inserted: ");
-        console.log($scope.todos[$scope.todos.length - 1]);
+        console.log($scope.todos[$scope.todos.length - 1].name);
       }
     }, function (err) {
-      console.error(err);
+      console.error(err.message);
     });
   };
 
@@ -133,23 +133,23 @@ app.controller('mainCtrl',function ($scope,$ionicPopup,$timeout,$cordovaSQLite,$
       for(i = index;i < $scope.todos.length - 1;i++){
         if(log) {
           console.log("Moved from: ");
-          console.log($scope.todos[i]);
+          console.log($scope.todos[i].posTodo);
         }
         $scope.todos[i].posTodo - 1;
         if(log) {
           console.log("Moved to: ");
-          console.log($scope.todos[i]);
+          console.log($scope.todos[i].posTodo);
         }
       }
     }, function (err) {
-      console.error(err);
+      console.error(err.message);
     });
   };
 
   $scope.updateTodo = function (index) {
     var addPopup = $ionicPopup.show({
       template: '<input type="text" ng-model="todos.todo">',
-      title: 'Enter To Do',
+      title: 'Modify To Do',
       subTitle: 'Please use normal things',
       scope: $scope,
       buttons: [
@@ -179,16 +179,16 @@ app.controller('mainCtrl',function ($scope,$ionicPopup,$timeout,$cordovaSQLite,$
     $cordovaSQLite.execute(db,query).then(function (res) {
       if(log) {
         console.log("Updated from: ");
-        console.log($scope.todos[index]);
+        console.log($scope.todos[index].name);
       }
       $scope.todos[index].name = todo;
       $scope.todos[index].posTodo = index;
       if(log) {
         console.log("Updated to: ");
-        console.log($scope.todos[index]);
+        console.log($scope.todos[index].name);
       }
     }, function (err) {
-      console.error(err);
+      console.error(err.message);
     });
   };
 
@@ -201,15 +201,13 @@ app.controller('mainCtrl',function ($scope,$ionicPopup,$timeout,$cordovaSQLite,$
     $scope.todos.splice(toIndex, 0, item);
   };
 
-  $scope.flushDB = function () {
+  /*$scope.flushDB = function () {
     var query = "DROP TABLE dbTodo";
     $cordovaSQLite.execute(db, query).then(function (res) {
-      for(i=0;i<$scope.todos.length;i++){
-        $scope.todos.splice(i,1);
-      }
+      $scope.todos.splice(0,$scope.todos.length);
       $scope.createTable();
     },function (err) {
-      console.log(err);
+      console.log(err.message);
     });
-  };
+  };*/
 });
