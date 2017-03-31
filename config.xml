@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <widget id="com.pyrosoft.todolist" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
   <name>todoList</name>
-  <description>
-        An Ionic Framework and Cordova project.
+  <description>&#xD;
+        An Ionic Framework and Cordova project.&#xD;
     </description>
-  <author email="ferchofpz@hotmail.com.com" href="http://pyrosoft.com/">
-      FPerez
+  <author email="ferchofpz@hotmail.com.com" href="http://pyrosoft.com/">&#xD;
+      FPerez&#xD;
     </author>
   <content src="index.html"/>
   <access origin="*"/>
@@ -42,4 +42,7 @@
   </platform>
   <plugin name="cordova-sqlite-storage" spec="~1.5.0"/>
   <allow-navigation href="http://192.168.0.7:8100"/>
+  <allow-navigation href="http://10.10.204.144:8100"/>
+  <allow-navigation href="http://10.10.204.144:8101"/>
+  <allow-navigation href="http://192.168.43.180:8100"/>
 </widget>

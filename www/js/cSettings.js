@@ -1,3 +1,5 @@
-/**
- * Created by ferperez on 28/03/2017.
- */
+var app = angular.module('starter.cSettings', ['ngCordova']);
+
+app.controller('settingCtrl',function ($scope) {
+
+});
