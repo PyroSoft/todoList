@@ -188,7 +188,7 @@ angular.module('$actionButton', ['ngAnimate'])
 
             this.$postLink = function() {
                 $timeout(function() {
-                    console.log('create')
+                    //console.log('create')
                     _this.onCreate();
                 })
             }
