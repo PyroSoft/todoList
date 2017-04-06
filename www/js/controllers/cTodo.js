@@ -1,6 +1,6 @@
 var app = angular.module('starter.cTodo', ['ngCordova','$actionButton']);
 
-app.controller('mainCtrl',function ($scope, $ionicPopup, $timeout, $cordovaSQLite, $actionButton, databaseFactory, $ionicPlatform, initDbService) {
+app.controller('mainCtrl',function ($scope, $ionicPopup, $cordovaSQLite, $actionButton, databaseFactory, $ionicPlatform, initDbService) {
 
   /*Variables*/
   $scope.editTodo = {
@@ -32,14 +32,15 @@ app.controller('mainCtrl',function ($scope, $ionicPopup, $timeout, $cordovaSQLit
 
   $scope.addTodo = function () {
     var addPopup = $ionicPopup.show({
-      template: '<input type="text" ng-model="todos.todo">',
-      title: 'New To Do',
-      subTitle: 'Please use normal things',
+      template: '<input type="text" id = "todoInput" ng-model="todos.todo">',
+      title: 'Nuevo elemento',
+      subTitle: 'Adicionar un nuevo item en mi lista',
       scope: $scope,
+      //defaultText: 'Prueba',
       buttons: [
-        { text: 'Cancel' },
+        { text: 'Cancelar' },
         {
-          text: '<b>Save</b>',
+          text: '<b>Guardar</b>',
           type: 'button-positive',
           onTap: function(e) {
             if (!$scope.todos.todo) {
@@ -52,10 +53,6 @@ app.controller('mainCtrl',function ($scope, $ionicPopup, $timeout, $cordovaSQLit
         }
       ]
     });
-
-    $timeout(function() {
-      addPopup.close(); //close the popup after 10 seconds for some reason
-    }, 10000);
   };
 
   $scope.removeTodo = function (index) {
@@ -65,13 +62,13 @@ app.controller('mainCtrl',function ($scope, $ionicPopup, $timeout, $cordovaSQLit
   $scope.updateTodo = function (index) {
     var addPopup = $ionicPopup.show({
       template: '<input type="text" ng-model="todos.todo">',
-      title: 'Modify To Do',
-      subTitle: 'Please use normal things',
+      title: 'Editar elemento',
+      subTitle: 'Modificar un item de mi lista',
       scope: $scope,
       buttons: [
-        { text: 'Cancel' },
+        { text: 'Cancelar' },
         {
-          text: '<b>Save</b>',
+          text: '<b>Guardar</b>',
           type: 'button-positive',
           onTap: function(e) {
             if (!$scope.todos.todo) {
@@ -84,10 +81,6 @@ app.controller('mainCtrl',function ($scope, $ionicPopup, $timeout, $cordovaSQLit
         }
       ]
     });
-
-    $timeout(function() {
-      addPopup.close(); //close the popup after 10 seconds for some reason
-    }, 10000);
   };
 
   $scope.moveTodo = function (fromIndex, toIndex) {
