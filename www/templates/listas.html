@@ -1,4 +1,4 @@
-<ion-view view-title="Configuración">
+<ion-view view-title="Mis listas">
   <ion-header-bar>
     <ion-nav-bar class="bar-positive">
       <ion-nav-back-button></ion-nav-back-button>
@@ -9,13 +9,8 @@
   </ion-header-bar>
   <ion-content>
     <ion-list class="list">
-      <ion-item class="item item-icon-left" ng-click="flushDb()">
-        <ion-content class="icon ion-trash-b"></ion-content>
-        Restaurar
-      </ion-item>
-      <ion-item class="item item-icon-left" href="#/app/info">
-        <ion-content class="icon ion-information-circled"></ion-content>
-        Información
+      <ion-item ng-repeat='lista in listas' class="item item-icon-right" href="#/app/todos/{{$index}}">
+        <h2>{{lista.name}}</h2>
       </ion-item>
     </ion-list>
   </ion-content>

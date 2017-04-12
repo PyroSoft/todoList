@@ -1,7 +1,7 @@
 {
-  "name": "todolist",
+  "name": "MyTodolist",
   "version": "1.1.1",
-  "description": "todoList: An Ionic project",
+  "description": "A ToDo list application",
   "dependencies": {
     "@ionic/storage": "^1.1.6",
     "gulp": "^3.5.6",

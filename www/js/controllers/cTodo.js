@@ -1,6 +1,6 @@
 var app = angular.module('starter.cTodo', ['ngCordova','$actionButton']);
 
-app.controller('mainCtrl',function ($scope, $ionicPopup, $cordovaSQLite, $actionButton, databaseFactory, $ionicPlatform, initDbService) {
+app.controller('mainCtrl',function ($scope, $ionicPopup, $cordovaSQLite, $actionButton, databaseFactory, initDbService,$cordovaSocialSharing,$stateParams) {
 
   /*Variables*/
   $scope.editTodo = {
@@ -10,12 +10,14 @@ app.controller('mainCtrl',function ($scope, $ionicPopup, $cordovaSQLite, $action
   $scope.todos = [];
 
   /*Events*/
-  $ionicPlatform.ready(function () {
+  /*$ionicPlatform.ready(function () {
     initDbService.createTableService();
     $scope.todos = databaseFactory.loadTodoService();
-  })
+  })*/
 
   $scope.$on('$ionicView.enter',function () {
+    var iLista = parseInt($stateParams.index)+1;
+    $scope.todos = databaseFactory.loadTodoService(iLista);
     var actionButton = $actionButton.create({
       mainAction: {
         icon: 'ion-plus-round',
@@ -36,7 +38,6 @@ app.controller('mainCtrl',function ($scope, $ionicPopup, $cordovaSQLite, $action
       title: 'Nuevo elemento',
       subTitle: 'Adicionar un nuevo item en mi lista',
       scope: $scope,
-      //defaultText: 'Prueba',
       buttons: [
         { text: 'Cancelar' },
         {
@@ -47,7 +48,8 @@ app.controller('mainCtrl',function ($scope, $ionicPopup, $cordovaSQLite, $action
               //don't allow the user to close unless he enters something
               e.preventDefault();
             } else {
-              $scope.todos = databaseFactory.insertTodoService($scope.todos.todo);
+              var iLista = parseInt($stateParams.index)+1;
+              $scope.todos = databaseFactory.insertTodoService($scope.todos.todo,iLista);
             }
           }
         }
@@ -86,4 +88,25 @@ app.controller('mainCtrl',function ($scope, $ionicPopup, $cordovaSQLite, $action
   $scope.moveTodo = function (fromIndex, toIndex) {
     $scope.todos = databaseFactory.modifyTodoService($scope.todos[fromIndex].name,fromIndex,toIndex);
   };
+
+  $scope.share = function () {
+    var msg = "MI LISTA\n";
+
+    if($scope.todos.length > 0){
+      for(var i = 1; i <= $scope.todos.length; i++){
+        msg = msg.concat("\n"+ i + " - " + $scope.todos[i-1].name);
+      }
+      msg = msg.concat("\n\n(Developed by PyroSoft)");
+      $cordovaSocialSharing.share(msg);
+
+      if(log) {
+        console.log("Shared " + $scope.todos.length + " todos");
+      }
+    }else{
+      var alertPopup = $ionicPopup.alert({
+        title: 'Ups!',
+        template: 'No tienes elementos para compartir'
+      });
+    }
+  }
 });

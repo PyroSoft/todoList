@@ -3,7 +3,7 @@
 // angular.module is a global place for creating, registering and retrieving Angular modules
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
-var app = angular.module('starter', ['ionic','starter.cTodo','starter.cSettings','starter.services']);
+var app = angular.module('starter', ['ionic','starter.cTodo','starter.cSettings','starter.cMenu','starter.cListas','starter.services']);
 
 app.run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
@@ -31,15 +31,35 @@ app.run(function($ionicPlatform) {
       url: '/app',
       abstract: true,
       templateUrl: 'templates/menu.html',
-      controller: 'settingCtrl'
+      controller: 'menuCtrl'
     })
 
     .state('app.todos', {
-      url: '/todos',
+      url: '/todos/:index',
       views: {
         'menuContent': {
           templateUrl: 'templates/todos.html',
           controller: 'mainCtrl'
+        }
+      }
+    })
+
+    .state('app.info', {
+      url: '/info',
+      views: {
+        'menuContent': {
+          templateUrl: 'templates/info.html',
+          controller: 'settingCtrl'
+        }
+      }
+    })
+
+    .state('app.listas', {
+      url: '/listas',
+      views: {
+        'menuContent': {
+          templateUrl: 'templates/listas.html',
+          controller: 'listasCtrl'
         }
       }
     })
@@ -55,5 +75,5 @@ app.run(function($ionicPlatform) {
     });
 
   // if none of the above states are matched, use this as the fallback
-  $urlRouterProvider.otherwise('/app/todos');
+  $urlRouterProvider.otherwise('/app/listas');
 });

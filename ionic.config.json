@@ -1,5 +1,5 @@
 {
-  "name": "todoList",
+  "name": "MyTodoList",
   "app_id": "da40a603",
   "gulpStartupTasks": [
     "sass",

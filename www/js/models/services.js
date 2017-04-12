@@ -1,6 +1,6 @@
 var app = angular.module('starter.services',[]);
 var db = null;
-var log = false;
+var log = true;
 var todoObj = [
   /*{
    "id":"1",
@@ -18,6 +18,20 @@ var todoObj = [
    "name":"todo3"
    }*/
 ];
+var listaObj = [
+  /*{
+   "id":"1",
+   "name":"lista1"
+   },
+   {
+   "id":"2",
+   "name":"lista2"
+   },
+   {
+   "id":"3",
+   "name":"lista3"
+   }*/
+];
 
 app.service('initDbService',function ($cordovaSQLite) {
   return{
@@ -27,8 +41,23 @@ app.service('initDbService',function ($cordovaSQLite) {
           name: "todoDb.db",
           location: "default"
         });
-        var query = "CREATE TABLE IF NOT EXISTS dbTodo (idTodo INTEGER PRIMARY KEY ASC AUTOINCREMENT, posTodo INTEGER, todo TEXT)";
-        $cordovaSQLite.execute(db, query);
+        var query = "CREATE TABLE IF NOT EXISTS dbTodo (idTodo INTEGER PRIMARY KEY ASC AUTOINCREMENT, posTodo INTEGER, todo TEXT, idLista INTEGER)";
+        $cordovaSQLite.execute(db, query).then(function (res) {
+          if (log){
+            console.log("Table dbTodo created");
+          }
+        },function (error) {
+          console.error(error.message);
+        });
+
+        var query = "CREATE TABLE IF NOT EXISTS dbLista (idLista INTEGER PRIMARY KEY ASC AUTOINCREMENT, lista TEXT)";
+        $cordovaSQLite.execute(db, query).then(function (res) {
+          if(log){
+            console.log("Table dbLista created");
+          }
+        },function (error) {
+          console.log(error.message);
+        });
       }catch(e){console.error(e);}
     }
   }
@@ -36,41 +65,44 @@ app.service('initDbService',function ($cordovaSQLite) {
 
 app.factory('databaseFactory',function ($cordovaSQLite, initDbService) {
   return{
-    loadTodoService : function () {
-      var query = "SELECT * FROM dbTodo ORDER BY posTodo";
+    loadTodoService : function (iLista) {
+      todoObj.splice(0, todoObj.length);
+      var query = "SELECT * FROM dbTodo WHERE idLista = '"+iLista+"' ORDER BY posTodo";
+
       $cordovaSQLite.execute(db, query).then(function (res) {
-        if(log) {
+        if (log) {
           console.log("Loaded: " + res.rows.length + " todos");
         }
         if (res.rows.length > 0) {
-          for(var i = 0;i < res.rows.length;i++) {
+          for (var i = 0; i < res.rows.length; i++) {
             todoObj.push({
-              "id":res.rows.item(i).idTodo,
-              "posTodo":res.rows.item(i).posTodo,
-              "name":res.rows.item(i).todo
+              "id": res.rows.item(i).idTodo,
+              "posTodo": res.rows.item(i).posTodo,
+              "name": res.rows.item(i).todo
             });
-            if(log) {
-              console.log("Todo " + res.rows.item(i).posTodo + " " + res.rows.item(i).todo);
+            if (log) {
+              console.log("Todo " + todoObj[i].posTodo + " " + todoObj[i].name+" Lista "+res.rows.item(i).idLista);
             }
           }
         }
       }, function (error) {
         console.error(error.message);
       });
+
       return todoObj;
     },
 
-    insertTodoService : function (newTodo) {
+    insertTodoService : function (newTodo,iLista) {
       var posTodo = todoObj.length;
-      var query = "INSERT INTO dbTodo (todo,posTodo) VALUES (?,?)";
-      $cordovaSQLite.execute(db,query,[newTodo,posTodo]).then(function (res) {
+      var query = "INSERT INTO dbTodo (todo,posTodo,idLista) VALUES (?,?,?)";
+      $cordovaSQLite.execute(db,query,[newTodo,posTodo,iLista]).then(function (res) {
         todoObj.push({
           "id":res.insertId,
           "posTodo":posTodo,
           "name":newTodo
         });
         if(log) {
-          console.log("Inserted: "+todoObj[todoObj.length - 1].name);
+          console.log("Inserted: "+todoObj[todoObj.length - 1].name+" Lista: "+iLista);
         }
       }, function (err) {
         console.error(err.message);
@@ -135,15 +167,64 @@ app.factory('databaseFactory',function ($cordovaSQLite, initDbService) {
     flushDbService: function () {
       var query = "DROP TABLE dbTodo";
       $cordovaSQLite.execute(db, query).then(function (res) {
-        initDbService.createTableService();
-        if(log){
-          console.log(todoObj.length+" Todos deleted");
+        if (log) {
+          console.log(todoObj.length + " Todos deleted");
         }
-        todoObj.splice(0,todoObj.length);
+        todoObj.splice(0, todoObj.length);
+        var query = "DROP TABLE dbLista";
+        $cordovaSQLite.execute(db, query).then(function (res) {
+          if (log) {
+            console.log(listaObj.length + " Lists deleted");
+          }
+          listaObj.splice(0, listaObj.length);
+          initDbService.createTableService();
+        },function (err) {
+          console.error(err.message);
+        });
       },function (err) {
         console.error(err.message);
       });
-      //return todoObj;
-    }
+    },
+
+    loadListaService : function () {
+      if(listaObj.length == 0) {
+        var query = "SELECT * FROM dbLista ORDER BY lista";
+        $cordovaSQLite.execute(db, query).then(function (res) {
+          if (log) {
+            console.log("Loaded: " + res.rows.length + " lists");
+          }
+          if (res.rows.length > 0) {
+            for (var i = 0; i < res.rows.length; i++) {
+              listaObj.push({
+                "id": res.rows.item(i).idLista,
+                "name": res.rows.item(i).lista
+              });
+              if (log) {
+                console.log("List " + listaObj[i].id + " - " +listaObj[i].name);
+              }
+            }
+          }
+        }, function (error) {
+          console.error(error.message);
+        });
+      }
+      return listaObj;
+    },
+
+    insertListaService : function (newLista) {
+      var query = "INSERT INTO dbLista (lista) VALUES (?)";
+      $cordovaSQLite.execute(db,query,[newLista]).then(function (res) {
+        listaObj.push({
+          "id":res.insertId,
+          "name":newLista
+        });
+        if(log) {
+          console.log("Inserted: "+listaObj[listaObj.length - 1].name);
+        }
+      }, function (err) {
+        console.error(err.message);
+      });
+      return listaObj;
+    },
   }
 });

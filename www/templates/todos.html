@@ -1,5 +1,16 @@
-<ion-pane>
-  <ion-header-bar></ion-header-bar>
+<ion-view>
+  <ion-header-bar>
+    <ion-nav-bar class="bar-positive">
+      <ion-nav-back-button></ion-nav-back-button>
+      <ion-nav-buttons side="left">
+        <button class="button button-icon button-clear ion-navicon" menu-toggle="left"></button>
+      </ion-nav-buttons>
+      <ion-nav-title class="title">Mi lista</ion-nav-title>
+      <ion-nav-buttons side="right">
+        <button class="button button-icon button-clear ion-android-share-alt" ng-click="share()"></button>
+      </ion-nav-buttons>
+    </ion-nav-bar>
+  </ion-header-bar>
   <ion-content>
     <ion-list class="list" show-delete="editTodo.showEdit" show-reorder="editTodo.showEdit" on-hold="editTodo.showEdit = !editTodo.showEdit">
       <ion-item ng-repeat='todo in todos' class="item item-icon-right" ng-click="updateTodo($index)">
@@ -9,4 +20,4 @@
       </ion-item>
     </ion-list>
   </ion-content>
-</ion-pane>
+</ion-view>
