@@ -1,6 +1,6 @@
 var app = angular.module('starter.services',[]);
 var db = null;
-var log = true;
+var log = false;
 var todoObj = [
   /*{
    "id":"1",
@@ -21,14 +21,17 @@ var todoObj = [
 var listaObj = [
   /*{
    "id":"1",
+   "posLista":"0",
    "name":"lista1"
    },
    {
    "id":"2",
+   "posLista":"1",
    "name":"lista2"
    },
    {
    "id":"3",
+   "posLista":"2",
    "name":"lista3"
    }*/
 ];
@@ -41,7 +44,7 @@ app.service('initDbService',function ($cordovaSQLite) {
           name: "todoDb.db",
           location: "default"
         });
-        var query = "CREATE TABLE IF NOT EXISTS dbTodo (idTodo INTEGER PRIMARY KEY ASC AUTOINCREMENT, posTodo INTEGER, todo TEXT, idLista INTEGER)";
+        var query = "CREATE TABLE IF NOT EXISTS dbTodo (idTodo INTEGER PRIMARY KEY ASC AUTOINCREMENT, posTodo INTEGER, todo TEXT, posLista INTEGER)";
         $cordovaSQLite.execute(db, query).then(function (res) {
           if (log){
             console.log("Table dbTodo created");
@@ -50,7 +53,7 @@ app.service('initDbService',function ($cordovaSQLite) {
           console.error(error.message);
         });
 
-        var query = "CREATE TABLE IF NOT EXISTS dbLista (idLista INTEGER PRIMARY KEY ASC AUTOINCREMENT, lista TEXT)";
+        var query = "CREATE TABLE IF NOT EXISTS dbLista (idLista INTEGER PRIMARY KEY ASC AUTOINCREMENT, posLista INTEGER, lista TEXT)";
         $cordovaSQLite.execute(db, query).then(function (res) {
           if(log){
             console.log("Table dbLista created");
@@ -65,9 +68,9 @@ app.service('initDbService',function ($cordovaSQLite) {
 
 app.factory('databaseFactory',function ($cordovaSQLite, initDbService) {
   return{
-    loadTodoService : function (iLista) {
+    loadTodoService : function (posLista) {
       todoObj.splice(0, todoObj.length);
-      var query = "SELECT * FROM dbTodo WHERE idLista = '"+iLista+"' ORDER BY posTodo";
+      var query = "SELECT * FROM dbTodo WHERE posLista = '"+posLista+"' ORDER BY posTodo";
 
       $cordovaSQLite.execute(db, query).then(function (res) {
         if (log) {
@@ -81,7 +84,7 @@ app.factory('databaseFactory',function ($cordovaSQLite, initDbService) {
               "name": res.rows.item(i).todo
             });
             if (log) {
-              console.log("Todo " + todoObj[i].posTodo + " " + todoObj[i].name+" Lista "+res.rows.item(i).idLista);
+              console.log("ID " + todoObj[i].id + " POS " + todoObj[i].posTodo+" NAME "+todoObj[i].name+" LIST "+res.rows.item(i).posLista);
             }
           }
         }
@@ -92,17 +95,17 @@ app.factory('databaseFactory',function ($cordovaSQLite, initDbService) {
       return todoObj;
     },
 
-    insertTodoService : function (newTodo,iLista) {
+    insertTodoService : function (newTodo,posLista) {
       var posTodo = todoObj.length;
-      var query = "INSERT INTO dbTodo (todo,posTodo,idLista) VALUES (?,?,?)";
-      $cordovaSQLite.execute(db,query,[newTodo,posTodo,iLista]).then(function (res) {
+      var query = "INSERT INTO dbTodo (todo,posTodo,posLista) VALUES (?,?,?)";
+      $cordovaSQLite.execute(db,query,[newTodo,posTodo,posLista]).then(function (res) {
         todoObj.push({
           "id":res.insertId,
           "posTodo":posTodo,
           "name":newTodo
         });
         if(log) {
-          console.log("Inserted: "+todoObj[todoObj.length - 1].name+" Lista: "+iLista);
+          console.log("Inserted: "+todoObj[todoObj.length - 1].name+" Lista: "+posLista);
         }
       }, function (err) {
         console.error(err.message);
@@ -110,14 +113,14 @@ app.factory('databaseFactory',function ($cordovaSQLite, initDbService) {
       return todoObj;
     },
 
-    modifyTodoService : function (nameTodo,iTodo,jTodo) {
+    modifyTodoService : function (nameTodo,iTodo,jTodo,posLista) {
       var item = todoObj[iTodo];
       //Query que realiza movimiento en caso de ordenamiento negativo
-      var query1 = "UPDATE dbTodo SET posTodo = posTodo + 1 WHERE posTodo >= "+jTodo+" AND posTodo < "+iTodo;
+      var query1 = "UPDATE dbTodo SET posTodo = posTodo + 1 WHERE posTodo >= "+jTodo+" AND posTodo < "+iTodo+" AND posLista = "+posLista;
       //Query que realiza movimiento en caso de ordenamiento positivo
-      var query2 = "UPDATE dbTodo SET posTodo = posTodo - 1 WHERE posTodo <= "+jTodo+" AND posTodo > "+iTodo;
+      var query2 = "UPDATE dbTodo SET posTodo = posTodo - 1 WHERE posTodo <= "+jTodo+" AND posTodo > "+iTodo+" AND posLista = "+posLista;
       //Query que actualiza el item
-      var query3 = "UPDATE dbTodo SET todo = '" +nameTodo+ "',posTodo = '" +jTodo+ "' WHERE idTodo = " +todoObj[iTodo].id;
+      var query3 = "UPDATE dbTodo SET todo = '" +nameTodo+ "',posTodo = '" +jTodo+ "' WHERE idTodo = " +todoObj[iTodo].id+" AND posLista = "+posLista;
 
       if(iTodo>jTodo){
         $cordovaSQLite.execute(db,query1).then(function (res) {},function (err) {
@@ -137,7 +140,7 @@ app.factory('databaseFactory',function ($cordovaSQLite, initDbService) {
           todoObj.splice(jTodo, 0, item);
         }
         if (log){
-          console.log("Updated: "+todoObj[jTodo].name+" Pos: "+jTodo)
+          console.log("Updated: "+todoObj[jTodo].name+" Pos: "+jTodo+" Lista: "+posLista);
         }
       }, function (err) {
         console.error(err);
@@ -145,19 +148,22 @@ app.factory('databaseFactory',function ($cordovaSQLite, initDbService) {
       return todoObj;
     },
 
-    deleteTodoService : function (iTodo) {
-      var query = "DELETE FROM dbTodo WHERE idTodo = " + todoObj[iTodo].id;
+    deleteTodoService : function (iTodo,posLista) {
+      var query = "DELETE FROM dbTodo WHERE idTodo = " + todoObj[iTodo].id+" AND posLista = "+posLista;
+      var query2 = 'UPDATE dbTodo SET posTodo = posTodo - 1 WHERE posTodo > '+iTodo;
+
       $cordovaSQLite.execute(db,query).then(function (res) {
-        todoObj.splice(iTodo,1);
-        for(i = iTodo;i < todoObj.length - 1;i++){
+        $cordovaSQLite.execute(db,query2);
+        for(i = iTodo+1;i < todoObj.length;i++){
           if(log) {
-            console.log("Moved from: "+todoObj[i].posTodo);
+            console.log("Moved from: "+todoObj[i].posTodo+" Lista: "+posLista);
           }
-          todoObj[i].posTodo - 1;
+          todoObj[i].posTodo = todoObj[i].posTodo - 1;
           if(log) {
-            console.log("Moved to: "+todoObj[i].posTodo);
+            console.log("Moved to: "+todoObj[i].posTodo+" Lista: "+posLista);
           }
         }
+        todoObj.splice(iTodo,1);
       }, function (err) {
         console.error(err.message);
       });
@@ -188,7 +194,7 @@ app.factory('databaseFactory',function ($cordovaSQLite, initDbService) {
 
     loadListaService : function () {
       if(listaObj.length == 0) {
-        var query = "SELECT * FROM dbLista ORDER BY lista";
+        var query = "SELECT * FROM dbLista ORDER BY posLista";
         $cordovaSQLite.execute(db, query).then(function (res) {
           if (log) {
             console.log("Loaded: " + res.rows.length + " lists");
@@ -197,10 +203,11 @@ app.factory('databaseFactory',function ($cordovaSQLite, initDbService) {
             for (var i = 0; i < res.rows.length; i++) {
               listaObj.push({
                 "id": res.rows.item(i).idLista,
+                "posLista":res.rows.item(i).posLista,
                 "name": res.rows.item(i).lista
               });
               if (log) {
-                console.log("List " + listaObj[i].id + " - " +listaObj[i].name);
+                console.log("List " + listaObj[i].posLista + " - " +listaObj[i].name);
               }
             }
           }
@@ -212,19 +219,68 @@ app.factory('databaseFactory',function ($cordovaSQLite, initDbService) {
     },
 
     insertListaService : function (newLista) {
-      var query = "INSERT INTO dbLista (lista) VALUES (?)";
-      $cordovaSQLite.execute(db,query,[newLista]).then(function (res) {
+      var posLista = listaObj.length;
+      var query = "INSERT INTO dbLista (posLista, lista) VALUES (?,?)";
+      $cordovaSQLite.execute(db,query,[posLista,newLista]).then(function (res) {
         listaObj.push({
           "id":res.insertId,
+          "posLista":posLista,
           "name":newLista
         });
         if(log) {
-          console.log("Inserted: "+listaObj[listaObj.length - 1].name);
+          console.log("Inserted: "+listaObj[listaObj.length - 1].name+" Pos: "+posLista);
         }
       }, function (err) {
         console.error(err.message);
       });
       return listaObj;
     },
+
+    deleteListaService : function (iLista) {
+      //List's Scripts
+      var query1 = "DELETE FROM dbLista WHERE idLista = " + listaObj[iLista].id;
+      var query2 = 'UPDATE dbLista SET posLista = posLista - 1 WHERE posLista > '+iLista;
+      //Element's Scripts
+      var query3 = 'DELETE FROM dbTodo WHERE posLista = '+iLista;
+      var query4 = 'UPDATE dbTodo SET posLista = posLista - 1 WHERE posLista >'+iLista;
+
+      $cordovaSQLite.execute(db,query1).then(function (res) {
+        $cordovaSQLite.execute(db,query2);
+        $cordovaSQLite.execute(db,query3);
+        $cordovaSQLite.execute(db,query4);
+        for(i = iLista+1;i < listaObj.length;i++){
+          if(log) {
+            console.log("Moved from: "+listaObj[i].posLista);
+          }
+          listaObj[i].posLista = listaObj[i].posLista - 1;
+          if(log) {
+            console.log("Moved to: "+listaObj[i].posLista);
+          }
+        }
+        listaObj.splice(iLista,1);
+      }, function (err) {
+        console.error(err.message);
+      });
+      return listaObj;
+    },
+
+    modifyListaService : function (nameLista,iLista) {
+      //Query que actualiza el item
+      var query1 = "UPDATE dbLista SET lista = '" +nameLista+ "' WHERE idLista = " +listaObj[iLista].id;
+
+      $cordovaSQLite.execute(db,query1).then(function (res) {
+        listaObj[iLista].name = nameLista;
+        if (log){
+          console.log("Updated: "+listaObj[iLista].name);
+        }
+      }, function (err) {
+        console.error(err);
+      });
+      return listaObj;
+    },
+
+    listLabelService : function (iLista) {
+      return listaObj[iLista].name;
+    }
   }
 });
